@@ -33,7 +33,7 @@ fn u8_rgb_color(r: u8, g: u8, b: u8) -> u32 {
     (r << 16) | (g << 8) | b
 }
 
-/// Bresenham line
+/// Bresenham Line
 ///
 /// Takes in x0, y0, x1, and y1 values respectively.
 /// These values are used draw a line of a specified color on a canvas buffer
