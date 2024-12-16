@@ -65,48 +65,41 @@ fn line(
     }
 
     let mut x = x0;
-    while x <= x1 {
-        // Interpolation parameter. Determines the relative position along the line between the start point and the end point.
-        let t = (x-x0)/(x1-x0); // Ranges between 0.0 - 1.0
-        let y = y0 + t*(y1-y0); // Linear interpolation applied 
+    let dx = x1 - x0;
+    let dy = y1 - y0;
+    let derror = (dy/dx).abs();
+    let mut error = 0.0;
+    let mut y = y0;
 
+    while x <= x1 {
         // Convert coordinates to buffer index based on if line is transposed
-        let (dx, dy) = if steep {
+        let (draw_x, draw_y) = if steep {
             (y as usize, x as usize)
         } else {
             (x as usize, y as usize)
         };
 
         // Ensure coordinates are within bounds and draw point 
-        if dx < width && dy < height {
-            let idx = dy * width + dx;
+        if draw_x < width && draw_y < height {
+            let idx = draw_y * width + draw_x;
             canvas_buf[idx] = color;
         } else {
             println!("ERROR: Coordinates are not within canvas bounds");
         }
 
+        error = error + derror;
+        if error > 0.5 {
+            y = y + (if y1>y0 { 1.0 } else { -1.0 });
+            error -= 1.0;
+        }
+
         x += 1.0;
     }
-    
-    // Original Implementation
-    // let mut t = 0.0;
-
-    // while t < 1.0 {
-    //     let x = (x0 + (x1 - x0) * t) as usize;
-    //     let y = (y0 + (y1 - y0) * t) as usize;
-
-    //     if x < width && y < canvas_buf.len() / width {
-    //         let idx = y * width + x;
-    //         canvas_buf[idx] = color;
-    //     }
-
-    //     t += 0.01;
-    // }
 }
 
 fn main() {
     let mut window = match Window::new(
-        "rust renderer",
+        "rtgx",
         WIDTH,
         HEIGHT,
         WindowOptions {
