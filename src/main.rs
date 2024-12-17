@@ -1,33 +1,26 @@
+/*
+ * =============================================================================
+ * Project: Tiny Renderer Built in Rust  
+ * Author: Gael Zarco
+ * Date: December 1st, 2024 
+ * License: IDK 
+ * Description:
+ * Built using the following guide: https://github.com/ssloy/tinyrenderer/wiki
+ * =============================================================================
+ */
+
+pub mod geometry;
+
 use minifb::{Window, WindowOptions};
 
 const WIDTH: usize = 1080;
 const HEIGHT: usize = 720;
 
-// struct FrameBuf {
-//     width: usize,
-//     height: usize,
-//     color: u32, // RGB Color
-//     buf: Vec<u32>,
-// }
-//
-// impl FrameBuf {
-//     // Creates a new instance of Frame Buffer
-//     pub fn new(width: usize, height: usize, color: u32) -> Self {
-//         Self {
-//             width,
-//             height,
-//             color,
-//             buf: vec![color; width * height],
-//         }
-//     }
-//
-//     // Creates 32-bit RGB value using rgb input
-//     pub fn u8_rgb_color(r: u8, g: u8, b: u8) -> u32 {
-//         let (r, g, b) = (r as u32, g as u32, b as u32);
-//         (r << 16) | (g << 8) | b
-//     }
-// }
-
+/// RGB color
+///
+/// Takes in r, g, and b values as 8-bit and spits out a 32-bit color integer
+///
+/// Utilizes bit-wise operations to amalgamate a final color value
 fn u8_rgb_color(r: u8, g: u8, b: u8) -> u32 {
     let (r, g, b) = (r as u32, g as u32, b as u32);
     (r << 16) | (g << 8) | b
@@ -53,26 +46,27 @@ fn line(
 ) {
     let mut steep = false;
 
+    // If the line in steep, we transpose the image
     if (x0 - x1).abs() < (y0 - y1).abs() {
-        // If the line in steep, we transpose the image
         (x0, y0) = (y0, x0);
         (x1, y1) = (y1, x1);
         steep = true;
     }
 
+    // Make line left to right
     if x0 > x1 {
-        // Make it left to right
         (x0, x1) = (x1, x0);
         (y0, y1) = (y1, y0);
     }
 
     let mut x = x0; // Start point
+    let mut y = y0; // Start point
     let dx = x1 - x0; // Total deviation of x
     let dy = y1 - y0; // Total deviation of y
-    let derror2 = (dy.abs()) * 2;
-    let mut error2 = 0;
-    let mut y = y0;
-
+    let derror2 = (dy.abs()) * 2; // Change in Y incremental integer operation. Multiplies dy by 2 to avoid float operations
+    let mut error2 = 0; // Initialize error accumulator
+                        
+    // Loop until x is greater than x1
     while x <= x1 {
         // Convert coordinates to buffer index based on if line is transposed
         let (draw_x, draw_y) = if steep {
@@ -89,12 +83,15 @@ fn line(
             println!("ERROR: Coordinates are not within canvas bounds");
         }
 
-        error2 += derror2;
-        if error2 > dx {
+        error2 += derror2; // Increment accumulator by dy incremental integer 
+        // If accumulator is greater than change in x, find closest Y coordinate 
+        if error2 > dx { 
             y += if y1 > y0 { 1 } else { -1 };
+            // Reset accumulator
             error2 -= dx * 2;
         }
 
+        // Continue loop
         x += 1;
     }
 }
