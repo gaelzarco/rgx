@@ -1,6 +1,4 @@
 use minifb::{Window, WindowOptions};
-use rand::Rng;
-use std::time::Instant;
 
 const WIDTH: usize = 1080;
 const HEIGHT: usize = 720;
@@ -122,35 +120,6 @@ fn main() {
     window.topmost(true);
 
     let mut canvas_buf = vec![0; WIDTH * HEIGHT];
-
-    let mut rng = rand::thread_rng(); // Random number generator
-    let start = Instant::now();
-    //
-    for _ in 0..1000000 {
-        let x0 = rng.gen_range(0..WIDTH as i32);
-        let y0 = rng.gen_range(0..HEIGHT as i32);
-        let x1 = rng.gen_range(0..WIDTH as i32);
-        let y1 = rng.gen_range(0..HEIGHT as i32);
-
-        let (r, g, b) = (
-            rng.gen_range(0..255),
-            rng.gen_range(0..255),
-            rng.gen_range(0..255),
-        );
-
-        line(
-            x0,
-            y0,
-            x1,
-            y1,
-            &mut canvas_buf,
-            WIDTH,
-            HEIGHT,
-            &u8_rgb_color(r, g, b),
-        );
-    }
-
-    println!("Time elapsed: {:?}", start.elapsed());
 
     while window.is_open() {
         window
