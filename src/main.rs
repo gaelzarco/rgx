@@ -1,4 +1,6 @@
 use minifb::{Window, WindowOptions};
+use rand::Rng;
+use std::time::Instant;
 
 const WIDTH: usize = 1080;
 const HEIGHT: usize = 720;
@@ -42,33 +44,35 @@ fn u8_rgb_color(r: u8, g: u8, b: u8) -> u32 {
 ///
 /// The width and height vars are the width and height of the canvas
 fn line(
-    mut x0: f32,
-    mut y0: f32,
-    mut x1: f32,
-    mut y1: f32,
+    mut x0: i32,
+    mut y0: i32,
+    mut x1: i32,
+    mut y1: i32,
     canvas_buf: &mut Vec<u32>,
     width: usize,
     height: usize,
-    color: u32,
+    color: &u32,
 ) {
     let mut steep = false;
 
-    if (x0-x1).abs() < (y0-y1).abs() { // If the line in steep, we transpose the image
+    if (x0 - x1).abs() < (y0 - y1).abs() {
+        // If the line in steep, we transpose the image
         (x0, y0) = (y0, x0);
         (x1, y1) = (y1, x1);
         steep = true;
     }
 
-    if x0 > x1 { // Make it left to right
+    if x0 > x1 {
+        // Make it left to right
         (x0, x1) = (x1, x0);
         (y0, y1) = (y1, y0);
     }
 
-    let mut x = x0;
-    let dx = x1 - x0;
-    let dy = y1 - y0;
-    let derror = (dy/dx).abs();
-    let mut error = 0.0;
+    let mut x = x0; // Start point
+    let dx = x1 - x0; // Total deviation of x
+    let dy = y1 - y0; // Total deviation of y
+    let derror2 = (dy.abs()) * 2;
+    let mut error2 = 0;
     let mut y = y0;
 
     while x <= x1 {
@@ -79,21 +83,21 @@ fn line(
             (x as usize, y as usize)
         };
 
-        // Ensure coordinates are within bounds and draw point 
+        // Ensure coordinates are within bounds and draw point
         if draw_x < width && draw_y < height {
             let idx = draw_y * width + draw_x;
-            canvas_buf[idx] = color;
+            canvas_buf[idx] = *color;
         } else {
             println!("ERROR: Coordinates are not within canvas bounds");
         }
 
-        error = error + derror;
-        if error > 0.5 {
-            y = y + (if y1>y0 { 1.0 } else { -1.0 });
-            error -= 1.0;
+        error2 += derror2;
+        if error2 > dx {
+            y += if y1 > y0 { 1 } else { -1 };
+            error2 -= dx * 2;
         }
 
-        x += 1.0;
+        x += 1;
     }
 }
 
@@ -119,28 +123,35 @@ fn main() {
 
     let mut canvas_buf = vec![0; WIDTH * HEIGHT];
 
-    line(
-        0.0,
-        0.0,
-        300.0,
-        200.0,
-        &mut canvas_buf,
-        WIDTH,
-        HEIGHT,
-        u8_rgb_color(0, 124, 210),
-    );
+    let mut rng = rand::thread_rng(); // Random number generator
+    let start = Instant::now();
+    //
+    for _ in 0..1000000 {
+        let x0 = rng.gen_range(0..WIDTH as i32);
+        let y0 = rng.gen_range(0..HEIGHT as i32);
+        let x1 = rng.gen_range(0..WIDTH as i32);
+        let y1 = rng.gen_range(0..HEIGHT as i32);
 
-    line(
-        200.0,
-        300.0,
-        0.0,
-        0.0,
-        &mut canvas_buf,
-        WIDTH,
-        HEIGHT,
-        u8_rgb_color(125, 124, 210),
-    );
-    
+        let (r, g, b) = (
+            rng.gen_range(0..255),
+            rng.gen_range(0..255),
+            rng.gen_range(0..255),
+        );
+
+        line(
+            x0,
+            y0,
+            x1,
+            y1,
+            &mut canvas_buf,
+            WIDTH,
+            HEIGHT,
+            &u8_rgb_color(r, g, b),
+        );
+    }
+
+    println!("Time elapsed: {:?}", start.elapsed());
+
     while window.is_open() {
         window
             .update_with_buffer(&canvas_buf, WIDTH, HEIGHT)
