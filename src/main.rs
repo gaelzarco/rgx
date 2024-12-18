@@ -11,7 +11,7 @@
 
 pub mod geometry;
 
-use minifb::{Window, WindowOptions};
+use minifb::{ Window, WindowOptions };
 
 const WIDTH: usize = 1080;
 const HEIGHT: usize = 720;
@@ -80,7 +80,8 @@ fn line(
             let idx = draw_y * width + draw_x;
             canvas_buf[idx] = *color;
         } else {
-            println!("ERROR: Coordinates are not within canvas bounds");
+            println!("Coordinates (x:{}, y:{}) are not within canvas bounds",
+                draw_x, draw_y);
         }
 
         error2 += derror2; // Increment accumulator by dy incremental integer 
@@ -120,11 +121,21 @@ fn main() {
 
     let ( vertices, faces ) = geometry::load_obj("obj/african_head.obj");
 
+    for face in faces.iter() {
+        for j in 0..3 {
+            let v0 = &vertices[face[j]];
+            let v1 = &vertices[face[(j + 1) % 3]];
+
+            let (x0, y0) = geometry::three_to_canvas(v0, WIDTH, HEIGHT);
+            let (x1, y1) = geometry::three_to_canvas(v1, WIDTH, HEIGHT);
+
+            line(x0, y0, x1, y1, &mut canvas_buf, WIDTH, HEIGHT, &u8_rgb_color(255, 255, 255));
+        }
+    }
+
     while window.is_open() {
         window
             .update_with_buffer(&canvas_buf, WIDTH, HEIGHT)
-            .unwrap_or_else(|e| {
-                panic!("Error drawing buffer {e}");
-            });
+            .unwrap();
     }
 }
