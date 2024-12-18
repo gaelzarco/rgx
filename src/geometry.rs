@@ -57,7 +57,7 @@ pub fn load_obj(file_path: &str) -> (Vec<Vertex>, Vec<Vec<usize>>) {
 ///
 /// Translates normalized x and y vertex coordinates to match 2D origin and scales them to resolution 
 /// 
-/// Y-axis to match screen-space
+/// Y-axis flipped to transform y axis to screen space
 pub fn three_to_canvas(v: &Vertex, width: usize, height: usize) -> (i32, i32) {
     let x = ((v.0 + 1.0) * width as f32 / 2.0) as i32;
     let y = (height as f32 - (v.1 + 1.0) * height as f32 / 2.0) as i32; // Flip Y-axis 

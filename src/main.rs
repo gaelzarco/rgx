@@ -121,9 +121,12 @@ fn main() {
 
     let ( vertices, faces ) = geometry::load_obj("obj/african_head.obj");
 
+    // Loop over faces matrix
     for face in faces.iter() {
         for j in 0..3 {
+            // Get index of current face vertex
             let v0 = &vertices[face[j]];
+            // Get index of next face vertex, looping back to 0 after last vertex
             let v1 = &vertices[face[(j + 1) % 3]];
 
             let (x0, y0) = geometry::three_to_canvas(v0, WIDTH, HEIGHT);
