@@ -7,7 +7,7 @@
  * Description:
  * Built using the following guide: https://github.com/ssloy/tinyrenderer/wiki
  * =============================================================================
- */
+*/
 
 pub mod geometry;
 
@@ -117,6 +117,8 @@ fn main() {
     window.topmost(true);
 
     let mut canvas_buf = vec![0; WIDTH * HEIGHT];
+
+    let ( vertices, faces ) = geometry::load_obj("obj/african_head.obj");
 
     while window.is_open() {
         window
