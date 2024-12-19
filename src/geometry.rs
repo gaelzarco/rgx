@@ -5,7 +5,7 @@ use std::io::{BufRead, BufReader};
 #[derive(Debug)]
 pub struct Vertex(pub f32, pub f32, pub f32);
 
-// Stores 2D coordinates for simple line drawing
+/// Stores 2D coordinates, x and y in that order
 #[derive(Debug)]
 pub struct Coordinate(pub i32, pub i32);
 
@@ -60,24 +60,65 @@ pub fn load_obj(file_path: &str) -> (Vec<Vertex>, Vec<Vec<usize>>) {
 /// Takes in specified vertex and the canvas width/height to transform coordinates to 2D space
 ///
 /// Translates normalized x and y vertex coordinates to match 2D origin and scales them to resolution
-///
-/// Y-axis flipped to transform y axis to screen space
 pub fn three_to_canvas(v: &Vertex, width: usize, height: usize) -> (i32, i32) {
     let x = ((v.0 + 1.0) * width as f32 / 2.0) as i32;
-    let y = (height as f32 - (v.1 + 1.0) * height as f32 / 2.0) as i32; // Flip Y-axis
+    let y = ((v.1 + 1.0) * height as f32 / 2.0) as i32;
     (x, y)
 }
 
+/// Draws a 2D triangle onto the screen
+///
+/// Takes in 3 Coordinates (x, y) and
 pub fn triangle(
-    v1: Coordinate,
-    v2: Coordinate,
-    v3: Coordinate,
+    mut v0: Coordinate,
+    mut v1: Coordinate,
+    mut v2: Coordinate,
     canvas: &mut Vec<u32>,
     width: usize,
     height: usize,
     color: u32,
 ) {
-    crate::line(v1.0, v1.1, v2.0, v2.1, canvas, width, height, color);
-    crate::line(v2.0, v2.1, v3.0, v3.1, canvas, width, height, color);
-    crate::line(v3.0, v3.1, v1.0, v1.1, canvas, width, height, color);
+    // Bubblesort coordinates by y-axis (ascending)
+    if v0.1 > v1.1 {
+        (v0, v1) = (v1, v0);
+    }
+    if v0.1 > v2.1 {
+        (v0, v2) = (v2, v0);
+    }
+    if v1.1 > v2.1 {
+        (v1, v2) = (v2, v1)
+    }
+
+    let total_height = v2.1 - v0.1;
+
+    crate::line(
+        v0.0,
+        v0.1,
+        v1.0,
+        v1.1,
+        canvas,
+        width,
+        height,
+        crate::u8_rgb_color(0, 255, 0),
+    );
+    crate::line(
+        v1.0,
+        v1.1,
+        v2.0,
+        v2.1,
+        canvas,
+        width,
+        height,
+        crate::u8_rgb_color(0, 255, 0),
+    );
+    crate::line(
+        v2.0,
+        v2.1,
+        v0.0,
+        v0.1,
+        canvas,
+        width,
+        height,
+        crate::u8_rgb_color(255, 0, 0),
+    );
 }

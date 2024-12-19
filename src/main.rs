@@ -44,6 +44,10 @@ fn line(
     height: usize,
     color: u32,
 ) {
+    // Flip Y-axix to match screen space
+    y0 = height as i32 - y0;
+    y1 = height as i32 - y1;
+
     let mut steep = false;
 
     // If the line in steep, we transpose the image
@@ -123,6 +127,7 @@ fn main() {
 
     use geometry::triangle;
     use geometry::Coordinate;
+
     triangle(
         Coordinate(10, 70),
         Coordinate(50, 160),
@@ -152,18 +157,18 @@ fn main() {
     );
 
     // let ( vertices, faces ) = geometry::load_obj("obj/african_head.obj");
-
-    // Loop over faces matrix
+    //
+    //// Loop over faces matrix
     // for face in faces.iter() {
     //     for j in 0..3 {
     //         // Get index of current face vertex
     //         let v0 = &vertices[face[j]];
     //         // Get index of next face vertex, looping back to 0 after last vertex
     //         let v1 = &vertices[face[(j + 1) % 3]];
-
+    //
     //         let (x0, y0) = geometry::three_to_canvas(v0, WIDTH, HEIGHT);
     //         let (x1, y1) = geometry::three_to_canvas(v1, WIDTH, HEIGHT);
-
+    //
     //         line(x0, y0, x1, y1, &mut canvas_buf, WIDTH, HEIGHT, u8_rgb_color(255, 255, 255));
     //     }
     // }
