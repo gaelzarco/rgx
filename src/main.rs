@@ -85,7 +85,7 @@ fn line(
             canvas_buf[idx] = color;
         } else {
             println!(
-                "Coordinates (x:{}, y:{}) are not within canvas bounds",
+                "s (x:{}, y:{}) are not within canvas bounds",
                 draw_x, draw_y
             );
         }
@@ -126,30 +126,29 @@ fn main() {
     let mut canvas_buf = vec![0; WIDTH * HEIGHT];
 
     use geometry::triangle;
-    use geometry::Coordinate;
 
     triangle(
-        Coordinate(10, 70),
-        Coordinate(50, 160),
-        Coordinate(70, 80),
+        (10, 70),
+        (50, 160),
+        (70, 80),
         &mut canvas_buf,
         WIDTH,
         HEIGHT,
         u8_rgb_color(255, 255, 255),
     );
     triangle(
-        Coordinate(180, 50),
-        Coordinate(150, 1),
-        Coordinate(70, 180),
+        (180, 50),
+        (150, 1),
+        (70, 180),
         &mut canvas_buf,
         WIDTH,
         HEIGHT,
         u8_rgb_color(255, 255, 255),
     );
     triangle(
-        Coordinate(180, 150),
-        Coordinate(120, 160),
-        Coordinate(130, 180),
+        (180, 150),
+        (120, 160),
+        (130, 180),
         &mut canvas_buf,
         WIDTH,
         HEIGHT,
