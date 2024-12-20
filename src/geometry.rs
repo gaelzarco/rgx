@@ -133,35 +133,4 @@ pub fn triangle(
 
         crate::line(a.0, a.1, b.0, b.1, canvas, width, height, color);
     }
-
-    //crate::line(
-    //    v0.0,
-    //    v0.1,
-    //    v1.0,
-    //    v1.1,
-    //    canvas,
-    //    width,
-    //    height,
-    //    crate::u8_rgb_color(0, 255, 0),
-    //);
-    //crate::line(
-    //    v1.0,
-    //    v1.1,
-    //    v2.0,
-    //    v2.1,
-    //    canvas,
-    //    width,
-    //    height,
-    //    crate::u8_rgb_color(0, 255, 0),
-    //);
-    //crate::line(
-    //    v2.0,
-    //    v2.1,
-    //    v0.0,
-    //    v0.1,
-    //    canvas,
-    //    width,
-    //    height,
-    //    crate::u8_rgb_color(255, 0, 0),
-    //);
 }
