@@ -125,35 +125,35 @@ fn main() {
 
     let mut canvas_buf = vec![0; WIDTH * HEIGHT];
 
-    use geometry::triangle;
+    // use geometry::triangle;
 
-    triangle(
-        (10, 70),
-        (50, 160),
-        (70, 80),
-        &mut canvas_buf,
-        WIDTH,
-        HEIGHT,
-        u8_rgb_color(255, 255, 255),
-    );
-    triangle(
-        (180, 50),
-        (150, 1),
-        (70, 180),
-        &mut canvas_buf,
-        WIDTH,
-        HEIGHT,
-        u8_rgb_color(255, 255, 255),
-    );
-    triangle(
-        (180, 150),
-        (120, 160),
-        (130, 180),
-        &mut canvas_buf,
-        WIDTH,
-        HEIGHT,
-        u8_rgb_color(255, 255, 255),
-    );
+    // triangle(
+    //     (10, 70),
+    //     (50, 160),
+    //     (70, 80),
+    //     &mut canvas_buf,
+    //     WIDTH,
+    //     HEIGHT,
+    //     u8_rgb_color(255, 255, 255),
+    // );
+    // triangle(
+    //     (180, 50),
+    //     (150, 1),
+    //     (70, 180),
+    //     &mut canvas_buf,
+    //     WIDTH,
+    //     HEIGHT,
+    //     u8_rgb_color(255, 255, 255),
+    // );
+    // triangle(
+    //     (180, 150),
+    //     (120, 160),
+    //     (130, 180),
+    //     &mut canvas_buf,
+    //     WIDTH,
+    //     HEIGHT,
+    //     u8_rgb_color(255, 255, 255),
+    // );
 
     // let ( vertices, faces ) = geometry::load_obj("obj/african_head.obj");
     //
