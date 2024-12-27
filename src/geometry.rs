@@ -48,13 +48,13 @@ impl Point {
     }
 
     pub fn product(one: Point, two: Point) -> Point {
-        one.iter()
-            .map(|&ix| two
-                .iter()
+        one.into_iter()
+            .map(|item| two
+                .into_iter()
                 .collect()
             )
             .flatten()
-            .collect();
+            .collect()
     }
 }
 
