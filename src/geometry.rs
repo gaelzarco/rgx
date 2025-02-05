@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 /// Stores 3 vertex values (x, y, z)
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -13,19 +13,60 @@ impl Point {
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
     }
+    
+    // Cross product
+    pub fn cross(self, other: Self) -> Self {
+        Self {
+            x: self.y * other.z - self.z * other.y,
+            y: self.z * other.x - self.x * other.z,
+            z: self.x * other.y - self.y * other.x,
+        }
+    }
+
+    // Dot product
+    pub fn dot(&self, light: &[f32; 3] ) -> f32 {
+        self.x * light[0] + self.y * light[1] + self.z * light[2]
+    }
+
+    // Normalize the vector
+    pub fn normalize(&self) -> Self {
+        let length = (self.x * self.x + self.y * self.y + self.z * self.z).sqrt();
+        if length != 0.0 {
+            Self {
+                x: self.x / length,
+                y: self.y / length,
+                z: self.z / length,
+            }
+        } else {
+            self.clone()
+        }
+    }
 }
 
 impl std::ops::BitXor for Point {
-    type Output = Point;
+    type Output = Self;
 
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        Point::new(
-            self.y * rhs.z - self.z * rhs.y,
-            self.z * rhs.x - self.x * rhs.z,
-            self.x * rhs.y - self.y * rhs.x,
-        )
+    fn bitxor(self, other: Self) -> Self {
+        Self {
+            x: self.y * other.z - self.z * other.y,
+            y: self.z * other.x - self.x * other.z,
+            z: self.x * other.y - self.y * other.x,
+        }
     }
 }
+
+impl std::ops::Sub for Point {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+       Self { 
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
 
 /// Load Geometry into memory
 ///

@@ -9,11 +9,12 @@
 */
 
 pub mod geometry;
+
 use geometry::Point;
 use minifb::{Window, WindowOptions};
 use rand::Rng;
 
-const WIDTH: usize = 1080;
+const WIDTH: usize = 720;
 const HEIGHT: usize = 720;
 
 /// RGB color
@@ -57,32 +58,40 @@ fn main() {
 
     let mut canvas_buf = vec![0; WIDTH * HEIGHT];
 
+    // Load in face and vertex data
     let (vertices, faces) = geometry::load_obj("obj/african_head.obj");
+    // Establish light direction
+    let light_dir: [f32; 3] = [0.0, 0.0, -1.0];
 
     // Loop over faces matrix
     for face in faces.iter() {
         // Extract the 3 vertices of the current triangle
-        let p0 = &vertices[face[0]];
-        let p1 = &vertices[face[1]];
-        let p2 = &vertices[face[2]];
+        let p0 = vertices[face[0]];
+        let p1 = vertices[face[1]];
+        let p2 = vertices[face[2]];
 
-        // Convert 3D coordinates to 2D screen space
-        let (x0, y0) = geometry::three_to_canvas(p0, WIDTH, HEIGHT);
-        let (x1, y1) = geometry::three_to_canvas(p1, WIDTH, HEIGHT);
-        let (x2, y2) = geometry::three_to_canvas(p2, WIDTH, HEIGHT);
+        // Convert 3D coordinates to 2D screen coordinates
+        let (x0, y0) = geometry::three_to_canvas(&p0, WIDTH, HEIGHT);
+        let (x1, y1) = geometry::three_to_canvas(&p1, WIDTH, HEIGHT);
+        let (x2, y2) = geometry::three_to_canvas(&p2, WIDTH, HEIGHT);
 
-        // Prepare the vertices in 2D space for the triangle function
+        // Triangle coordinates
         let triangle_pts = [
             Point::new(x0, y0, 0.0),
             Point::new(x1, y1, 0.0),
             Point::new(x2, y2, 0.0),
         ];
 
-        // Assign a random color for the triangle
-        let color = random_color();
-
-        // Call the triangle function to render the triangle
-        geometry::triangle(&triangle_pts, &mut canvas_buf, WIDTH, HEIGHT, color);
+        // Normalize cross product value of triangle sides
+        let normal = (p2 - p0).cross(p1 - p0).normalize();
+        // Determine light intensity by dot product of light direction and point
+        let intensity = normal.dot(&light_dir);
+        // Back-face culling; discard triangles that are behind the object
+        if intensity > 0.0 {
+            let gray = (intensity * 255.0) as u8;
+            let color = u8_rgb_color(gray, gray, gray);
+            geometry::triangle(&triangle_pts, &mut canvas_buf, WIDTH, HEIGHT, color);
+        }
     }
 
     while window.is_open() {
