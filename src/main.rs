@@ -1,10 +1,12 @@
 /*
  * =============================================================================
- * Project: Tiny Renderer Built in Rust
+ * Project: Software Rasterizer 
  * Author: Gael Zarco
  * Date: December 1st, 2024
- * Description:
- * Built using the tiny renderer guide: https://github.com/ssloy/tinyrenderer/wiki
+ * Description: Translates pixel and triangle face coordinates to 2D image
+ *              implementing complex mathematical algorithms and perforamnce
+ *              optimizations such as back-face culling
+ * Project Based On: https://github.com/ssloy/tinyrenderer/wiki
  * =============================================================================
 */
 
@@ -12,8 +14,6 @@ pub mod geometry;
 
 use geometry::Point;
 use minifb::{Window, WindowOptions};
-use rand::Rng;
-
 const WIDTH: usize = 720;
 const HEIGHT: usize = 720;
 
@@ -25,15 +25,6 @@ const HEIGHT: usize = 720;
 fn u8_rgb_color(r: u8, g: u8, b: u8) -> u32 {
     let (r, g, b) = (r as u32, g as u32, b as u32);
     (r << 16) | (g << 8) | b
-}
-
-// Function to generate a random color (0xRRGGBB format)
-fn random_color() -> u32 {
-    let mut rng = rand::thread_rng();
-    let r = rng.gen_range(0..=255);
-    let g = rng.gen_range(0..=255);
-    let b = rng.gen_range(0..=255);
-    (r << 16) | (g << 8) | b // Combine into 0xRRGGBB format
 }
 
 fn main() {
