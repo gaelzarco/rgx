@@ -1,118 +1,15 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+/*
+ * =============================================================================
+ * Crate: Geometry
+ * Author: Gael Zarco
+ * Description: Includes Structs, Functions, and methods associated with
+ *              processing geometry
+ * =============================================================================
+*/
 
-/// Stores 3 vertex values (x, y, z)
-#[derive(Debug, Clone, Copy)]
-pub struct Point {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
+pub mod point;
 
-impl Point {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
-        Self { x, y, z }
-    }
-
-    // Cross product
-    pub fn cross(self, other: Self) -> Self {
-        Self {
-            x: self.y * other.z - self.z * other.y,
-            y: self.z * other.x - self.x * other.z,
-            z: self.x * other.y - self.y * other.x,
-        }
-    }
-
-    // Dot product
-    pub fn dot(&self, light: &[f32; 3]) -> f32 {
-        self.x * light[0] + self.y * light[1] + self.z * light[2]
-    }
-
-    // Normalize the vector
-    pub fn normalize(&self) -> Self {
-        let length = (self.x * self.x + self.y * self.y + self.z * self.z).sqrt();
-        if length != 0.0 {
-            Self {
-                x: self.x / length,
-                y: self.y / length,
-                z: self.z / length,
-            }
-        } else {
-            self.clone()
-        }
-    }
-}
-
-impl std::ops::BitXor for Point {
-    type Output = Self;
-
-    fn bitxor(self, other: Self) -> Self {
-        Self {
-            x: self.y * other.z - self.z * other.y,
-            y: self.z * other.x - self.x * other.z,
-            z: self.x * other.y - self.y * other.x,
-        }
-    }
-}
-
-impl std::ops::Sub for Point {
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self {
-        Self {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
-    }
-}
-
-/// Load Geometry into memory
-///
-/// Takes in a file path and returns a tuple of vectors
-///
-/// The first is a vector of geometric vertex coordinates
-/// The second is a matrix of face element coordinate vectors
-///
-/// Panics if file cannot be found opened.
-pub fn load_obj(file_path: &str) -> (Vec<Point>, Vec<Vec<usize>>) {
-    let mut vertices: Vec<Point> = vec![];
-    let mut faces = Vec::new();
-
-    let file = match File::open(file_path) {
-        Ok(f) => f,
-        Err(_) => panic!("ERROR: Could not find/open specified file"),
-    };
-    let reader = BufReader::new(file);
-
-    for line in reader.lines() {
-        let line = line.unwrap();
-        let mut parts = line.split_whitespace();
-
-        match parts.next() {
-            Some("v") => {
-                let x = parts.next().unwrap().parse::<f32>().unwrap();
-                let y = parts.next().unwrap().parse::<f32>().unwrap();
-                let z = parts.next().unwrap().parse::<f32>().unwrap();
-
-                vertices.push(Point::new(x, y, z));
-            }
-            Some("f") => {
-                // Face vert indices start from 1 so sub 1
-                // Retrieves vert coordinate of first value in each vert y,
-                // texture coor y, and normal y pair of triangle face
-                let face: Vec<usize> = parts
-                    .map(|part| part.split('/').next().unwrap().parse::<usize>().unwrap() - 1)
-                    .collect();
-
-                faces.push(face);
-            }
-            _ => {}
-        }
-    }
-
-    (vertices, faces)
-}
+use crate::geometry::point::Point;
 
 /// Transform 3D coordinates to 2D space
 ///
@@ -121,10 +18,10 @@ pub fn load_obj(file_path: &str) -> (Vec<Point>, Vec<Vec<usize>>) {
 ///
 /// Translates normalized x and y vertex coordinates to match 2D origin and
 /// scales them to resolution
-pub fn three_to_canvas(v: &Point, width: usize, height: usize) -> (f32, f32) {
-    let x = (v.x + 1.0) * width as f32 / 2.0;
-    let y = (v.y + 1.0) * height as f32 / 2.0;
-    (x, y)
+pub fn three_to_canvas(p: &Point, width: usize, height: usize) -> Point {
+    let x = (p.x + 1.0) * width as f32 / 2.0;
+    let y = (p.y + 1.0) * height as f32 / 2.0;
+    Point::new(x, y, p.z)
 }
 
 /// Bresenham Line
@@ -165,12 +62,12 @@ pub fn line(
         (y0, y1) = (y1, y0);
     }
 
-    let mut x = x0; // Start point
-    let mut y = y0; // Start point
-    let dx = x1 - x0; // Total deviation of x
-    let dy = y1 - y0; // Total deviation of y
-    let derror2 = (dy.abs()) * 2; // Multiply dy to avoid float operations
-    let mut error2 = 0; // Initialize error accumulator
+    let mut x = x0;                 // Start point
+    let mut y = y0;                 // Start point
+    let dx = x1 - x0;               // Total deviation of x
+    let dy = y1 - y0;               // Total deviation of y
+    let derror2 = (dy.abs()) * 2;   // Multiply dy to avoid float operations
+    let mut error2 = 0;             // Initialize error accumulator
 
     // Loop until x is greater than x1
     while x <= x1 {
@@ -192,7 +89,7 @@ pub fn line(
             );
         }
 
-        error2 += derror2; // Increment accumulator by dy incremental integer
+        error2 += derror2; // Increment accumulator by dy incremental int
 
         // If accumulator is greater than change in x, find closest Y coor
         if error2 > dx {
@@ -278,6 +175,8 @@ pub fn old_skool_triangle(
 }
 
 /// Caclulate Barycentric coordinates of triangle for triangle rasterization
+///
+/// Returns a new Point
 pub fn barycentric(pts: &[Point; 3], p: Point) -> Point {
     let u = Point::new(pts[2].x - pts[0].x, pts[1].x - pts[0].x, pts[0].x - p.x)
         ^ Point::new(pts[2].y - pts[0].y, pts[1].y - pts[0].y, pts[0].y - p.y);
@@ -290,6 +189,8 @@ pub fn barycentric(pts: &[Point; 3], p: Point) -> Point {
 }
 
 /// Improved method for drawing triangles
+///
+/// Utilizes bounding box and bary
 pub fn triangle(
     pts: &[Point; 3],
     canvas_buf: &mut Vec<u32>,
@@ -307,6 +208,7 @@ pub fn triangle(
         // Convert coordinate to screen space
         let screen_space_y = height as f32 - pts[i].y;
 
+        // Set bounding box
         bbox_min.x = f32::min(bbox_min.x, pts[i].x);
         bbox_min.y = f32::min(bbox_min.y, screen_space_y);
         bbox_max.x = f32::max(bbox_max.x, pts[i].x);
