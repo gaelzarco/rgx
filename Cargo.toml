@@ -1,5 +1,5 @@
 [package]
-name = "rtgx"
+name = "rgx"
 version = "0.1.0"
 edition = "2021"
 
