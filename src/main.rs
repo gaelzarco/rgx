@@ -1,6 +1,6 @@
 /*
  * =============================================================================
- * Project: Software Rasterizer 
+ * Project: Software Rasterizer
  * Author: Gael Zarco
  * Date: December 1st, 2024
  * Description: Translates pixel and triangle face coordinates to 2D image
@@ -21,7 +21,7 @@ const HEIGHT: usize = 720;
 ///
 /// Takes in r, g, and b values as 8-bit and spits out a 32-bit color integer
 ///
-/// Utilizes bit-wise operations to amalgamate a final color value
+/// Utilizes bit-wise operations to calculate a final color value
 fn u8_rgb_color(r: u8, g: u8, b: u8) -> u32 {
     let (r, g, b) = (r as u32, g as u32, b as u32);
     (r << 16) | (g << 8) | b
@@ -75,7 +75,7 @@ fn main() {
 
         // Normalize cross product value of triangle sides
         let normal = (p2 - p0).cross(p1 - p0).normalize();
-        // Determine light intensity by dot product of light direction and point
+        // Determine light intensity by dot product of light dir and point
         let intensity = normal.dot(&light_dir);
         // Back-face culling; discard triangles that are behind the object
         if intensity > 0.0 {

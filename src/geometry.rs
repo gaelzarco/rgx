@@ -13,7 +13,7 @@ impl Point {
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
     }
-    
+
     // Cross product
     pub fn cross(self, other: Self) -> Self {
         Self {
@@ -24,7 +24,7 @@ impl Point {
     }
 
     // Dot product
-    pub fn dot(&self, light: &[f32; 3] ) -> f32 {
+    pub fn dot(&self, light: &[f32; 3]) -> f32 {
         self.x * light[0] + self.y * light[1] + self.z * light[2]
     }
 
@@ -59,14 +59,13 @@ impl std::ops::Sub for Point {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-       Self { 
+        Self {
             x: self.x - other.x,
             y: self.y - other.y,
             z: self.z - other.z,
         }
     }
 }
-
 
 /// Load Geometry into memory
 ///
@@ -75,7 +74,7 @@ impl std::ops::Sub for Point {
 /// The first is a vector of geometric vertex coordinates
 /// The second is a matrix of face element coordinate vectors
 ///
-/// This fuction will panic if the file_path specified cannot be found or the file cannot be opened.
+/// Panics if file cannot be found opened.
 pub fn load_obj(file_path: &str) -> (Vec<Point>, Vec<Vec<usize>>) {
     let mut vertices: Vec<Point> = vec![];
     let mut faces = Vec::new();
@@ -99,8 +98,9 @@ pub fn load_obj(file_path: &str) -> (Vec<Point>, Vec<Vec<usize>>) {
                 vertices.push(Point::new(x, y, z));
             }
             Some("f") => {
-                // Face vertex indices start from 1 so sub 1
-                // Retrieves the vertex coordinate of the first value in each vert y, texture coor y, and normal y pair of a triangle face
+                // Face vert indices start from 1 so sub 1
+                // Retrieves vert coordinate of first value in each vert y,
+                // texture coor y, and normal y pair of triangle face
                 let face: Vec<usize> = parts
                     .map(|part| part.split('/').next().unwrap().parse::<usize>().unwrap() - 1)
                     .collect();
@@ -116,9 +116,11 @@ pub fn load_obj(file_path: &str) -> (Vec<Point>, Vec<Vec<usize>>) {
 
 /// Transform 3D coordinates to 2D space
 ///
-/// Takes in specified vertex and the canvas width/height to transform coordinates to 2D space
+/// Takes in specified vertex and canvas width/height to transform
+/// coordinates to 2D space
 ///
-/// Translates normalized x and y vertex coordinates to match 2D origin and scales them to resolution
+/// Translates normalized x and y vertex coordinates to match 2D origin and
+/// scales them to resolution
 pub fn three_to_canvas(v: &Point, width: usize, height: usize) -> (f32, f32) {
     let x = (v.x + 1.0) * width as f32 / 2.0;
     let y = (v.y + 1.0) * height as f32 / 2.0;
@@ -130,7 +132,8 @@ pub fn three_to_canvas(v: &Point, width: usize, height: usize) -> (f32, f32) {
 /// Takes in x0, y0, x1, and y1 values respectively.
 /// These values are used draw a line of a specified color on a canvas buffer
 ///
-/// The canvas buffer consists of a vector of pixels which length equals the total sum of the width x height
+/// The canvas buffer consists of a vector of pixels which length equals the
+/// total sum of the width x height
 ///
 /// The width and height vars are the width and height of the canvas
 pub fn line(
@@ -166,7 +169,7 @@ pub fn line(
     let mut y = y0; // Start point
     let dx = x1 - x0; // Total deviation of x
     let dy = y1 - y0; // Total deviation of y
-    let derror2 = (dy.abs()) * 2; // Change in Y incremental integer operation. Multiplies dy by 2 to avoid float operations
+    let derror2 = (dy.abs()) * 2; // Multiply dy to avoid float operations
     let mut error2 = 0; // Initialize error accumulator
 
     // Loop until x is greater than x1
@@ -190,7 +193,8 @@ pub fn line(
         }
 
         error2 += derror2; // Increment accumulator by dy incremental integer
-                           // If accumulator is greater than change in x, find closest Y coordinate
+
+        // If accumulator is greater than change in x, find closest Y coor
         if error2 > dx {
             y += if y1 > y0 { 1 } else { -1 };
             // Reset accumulator
@@ -294,31 +298,37 @@ pub fn triangle(
     color: u32,
 ) {
     // Initialize bounding box
-    let mut bbox_min = Point::new(width as f32 - 1.0, height as f32 - 1.0, 0.0);
-    let mut bbox_max = Point::new(0.0, 0.0, 0.0);
+    let mut bbox_min = Point::new(f32::MAX, f32::MAX, 0.0);
+    let mut bbox_max = Point::new(f32::MIN, f32::MIN, 0.0);
     let clamp = Point::new(width as f32 - 1.0, height as f32 - 1.0, 0.0);
 
     // Calculate bounding box
     for i in 0..3 {
-        // Invert Y-coordinate for screen space
+        // Convert coordinate to screen space
         let screen_space_y = height as f32 - pts[i].y;
 
-        bbox_min.x = f32::max(0.0, f32::min(bbox_min.x, pts[i].x));
-        bbox_min.y = f32::max(0.0, f32::min(bbox_min.y, screen_space_y));
-        bbox_max.x = f32::min(clamp.x, f32::max(bbox_max.x, pts[i].x));
-        bbox_max.y = f32::min(clamp.y, f32::max(bbox_max.y, screen_space_y));
+        bbox_min.x = f32::min(bbox_min.x, pts[i].x);
+        bbox_min.y = f32::min(bbox_min.y, screen_space_y);
+        bbox_max.x = f32::max(bbox_max.x, pts[i].x);
+        bbox_max.y = f32::max(bbox_max.y, screen_space_y);
     }
+
+    // Clamp to valid canvas bounds
+    bbox_min.x = f32::max(0.0, bbox_min.x);
+    bbox_min.y = f32::max(0.0, bbox_min.y);
+    bbox_max.x = f32::min(clamp.x, bbox_max.x);
+    bbox_max.y = f32::min(clamp.y, bbox_max.y);
 
     // Iterate over all pixels in the bounding box
     for px in bbox_min.x as usize..=bbox_max.x as usize {
         for py in bbox_min.y as usize..=bbox_max.y as usize {
-            // Convert back to triangle space (invert Y for barycentric calculation)
+            // Convert back to screen space (invert Y for bary calculation)
             let p = Point::new(px as f32, height as f32 - py as f32, 0.0);
 
-            // Compute barycentric coordinates
+            // Compute bary coordinates
             let bc_screen = barycentric(pts, p);
 
-            // Check if pixel is inside the triangle
+            // Check if pixel is inside triangle
             if bc_screen.x < 0.0 || bc_screen.y < 0.0 || bc_screen.z < 0.0 {
                 continue;
             }
@@ -327,9 +337,7 @@ pub fn triangle(
             let idx = py * width + px;
 
             // Set pixel in buffer
-            if idx < canvas_buf.len() {
-                canvas_buf[idx] = color;
-            }
+            canvas_buf[idx] = color;
         }
     }
 }
