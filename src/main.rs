@@ -21,7 +21,7 @@ const WIDTH: usize = 720;
 const HEIGHT: usize = 720;
 
 fn main() {
-    /* ======SCENE=============================================================== */
+    /* ======SCENE=========================================================== */
     // Create window with default options
     let mut window = match Window::new(
         "rtgx",
@@ -47,7 +47,7 @@ fn main() {
     // Establish light direction
     let light_dir: [f32; 3] = [0.0, 0.0, -1.0];
 
-    /* ======PROCESSING========================================================== */
+    /* ======PROCESSING====================================================== */
     // Load in face and vertex data
     let (vertices, faces) = obj::load_obj("obj/african_head.obj");
     // Loop over faces matrix
@@ -71,7 +71,7 @@ fn main() {
         let t2 = geometry::three_to_canvas(&p2, WIDTH, HEIGHT);
 
         // Triangle coordinates
-        let triangle_pts = [t0, t1, t2];
+        let t_pts = [t0, t1, t2];
 
         // Determine light intensity by dot product of light dir and triangle
         let intensity = normal.dot(&light_dir);
@@ -81,10 +81,10 @@ fn main() {
         let color = color::u8_rgb_color(gray, gray, gray);
 
         // Draw triangle
-        geometry::triangle(&triangle_pts, &mut canvas_buf, WIDTH, HEIGHT, color);
+        geometry::triangle(&t_pts, &mut canvas_buf, WIDTH, HEIGHT, color);
     }
 
-    /* ======OUPUT=============================================================== */
+    /* ======OUPUT=========================================================== */
     while window.is_open() {
         window
             .update_with_buffer(&canvas_buf, WIDTH, HEIGHT)

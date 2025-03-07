@@ -51,7 +51,10 @@ pub fn load_obj(file_path: &str) -> (Vec<Point>, Vec<Vec<usize>>) {
                 // Retrieves vert coordinate of first value in each vert y,
                 // texture coor y, and normal y pair of triangle face
                 let face: Vec<usize> = parts
-                    .map(|part| part.split('/').next().unwrap().parse::<usize>().unwrap() - 1)
+                    .map(|part| 
+                        part.split('/').next().unwrap().parse::<usize>()
+                        .unwrap() - 1
+                    )
                     .collect();
 
                 faces.push(face);
